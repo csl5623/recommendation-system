@@ -1,0 +1,5 @@
+host: localhost
+database: pg_vector_project
+user: postgres
+password: carla16
+port: 5433

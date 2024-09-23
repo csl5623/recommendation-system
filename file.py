@@ -1,12 +1,14 @@
 news_api_key = '940fdaaa135b4c1387757b9c30c2519d'
-open_api_key = "your_openai_api_key"
+open_api_key = "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"
 
 # call news api 
 from json_example import json_example
 import openai
 import psycopg2
 import requests
+import re
 
+openai.api_key = open_api_key
 
 conn1 = psycopg2.connect(
     host="localhost",
@@ -18,18 +20,17 @@ conn1 = psycopg2.connect(
 cur = conn1.cursor()
 
 def api_requests():
-    # url = f'https://newsapi.org/v2/everything?q=bitcoin&apiKey={news_api_key}'
-    # response = requests.get(url)
-
+    url = f'https://newsapi.org/v2/everything?q=bitcoin&apiKey={news_api_key}'
+    response = requests.get(url)
     data = []
-    for r in json_example["articles"]:
-       data.append((
-           r["title"],
-           r["content"]
-       ))
+    for r in response.json()["articles"]:
+        cleaned_txt = re.sub(r'...\[s*\+\d+\s*chars\]$', '', r["content"])
+        data.append((
+            r["title"],
+            cleaned_txt
+        ))
     
     query = "insert into news_articles(title,content) VALUES (%s,%s)"
-
     cur.executemany(query,data)
     conn1.commit()
 
@@ -41,23 +42,23 @@ def api_requests():
 def get_embedding(text):
     response = openai.embeddings.create(input=text, model="text-embedding-ada-002")
     return response['data'][0]['embedding']
-
+    
 
 def process_store_embeddings():
     cur.execute("SELECT id,content from news_articles")
     news_articles = cur.fetchall()
-
     for id,content in news_articles:
         embedding = get_embedding(content)
         cur.execute('insert into news_embeddings values (%s,%s)',(id,embedding))
         conn1.commit()
+    return None
 
 
 def recommendation_algorithm(content):
     emd = get_embedding(content)
-    
+
     #performs a search similarity between the vectors, content given in the function and the embeddings already stored in the news_articles table
-    query = """
+    query = """   
     SELECT n.title,n.content from news_articles n
     JOIN news_embeddings e ON e.id and n.id
     WHERE embedding <-> %s
@@ -69,19 +70,10 @@ def recommendation_algorithm(content):
 
 def main():
     api_requests()
+    # recommendation_algorithm('flight')
 
 
-
-if __name__ == "__main__":
-    main()
-
-
-#generate emebeddings
-
-
-#store embeddings in database
-
-
+main()
 
 
 
