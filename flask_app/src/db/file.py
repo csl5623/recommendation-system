@@ -12,15 +12,6 @@ import yaml
 
 openai.api_key = open_api_key
 
-# conn1 = psycopg2.connect(
-#     host="localhost",
-#     port="5433",
-#     database="pgvector_project",
-#     user="postgres",
-#     password="carla16"
-# )
-# cur = conn1.cursor()
-
 
 def connect():
     config = {}
