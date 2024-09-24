@@ -2,7 +2,6 @@ news_api_key = '940fdaaa135b4c1387757b9c30c2519d'
 open_api_key = "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"
 
 # call news api 
-from json_example import json_example
 import openai
 import psycopg2
 import requests
@@ -71,7 +70,6 @@ def api_requests():
 def get_embedding(text):
     response = openai.embeddings.create(input=text, model="text-embedding-ada-002")
     return response['data'][0]['embedding']
-    
 
 def process_store_embeddings():
     conn1 = connect()
@@ -87,13 +85,11 @@ def process_store_embeddings():
     return None
     
 
-
+#performs a search similarity between the vectors, content given in the function and the embeddings already stored in the news_articles table
 def recommendation_algorithm(content):
     emd = get_embedding(content)
-
-    #performs a search similarity between the vectors, content given in the function and the embeddings already stored in the news_articles table
     query = """   
-    SELECT n.title,n.content from news_articles n
+    SELECT n.id,n.title,n.content from news_articles n
     JOIN news_embeddings e ON e.id and n.id
     WHERE embedding <-> %s
     ORDER BY embedding
@@ -105,15 +101,6 @@ def recommendation_algorithm(content):
     rec_list = cur.fetchall()
     conn1.close()
     return rec_list
-
-
-def main():
-    api_requests()
-    # recommendation_algorithm('flight')
-
-
-main()
-
 
 
 
