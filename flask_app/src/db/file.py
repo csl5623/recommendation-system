@@ -109,4 +109,12 @@ def recommendation_algorithm(content):
 
 def main():
     api_requests()
-    # recommendation_algorithm('fligh
+    # recommendation_algorithm('flight')
+
+
+main()
+
+
+
+
+
